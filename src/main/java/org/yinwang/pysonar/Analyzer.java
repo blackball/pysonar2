@@ -597,6 +597,24 @@ public class Analyzer {
         sb.append("\n- name resolve rate: " + $.percent(resolved, resolved + unresolved));
         sb.append("\n" + $.getGCStats());
 
+
+        /// Ugly codes to print out the semantic errors
+        if (semanticErrors.size() > 0)
+                System.out.println("\n\nPrinting the semantic errors: \n");
+        for (Map.Entry<String, List<Diagnostic>> entry : semanticErrors.entrySet()) {
+                String key = entry.getKey();
+                List<Diagnostic> value = entry.getValue();
+                System.out.println("In the file: " + key);
+                int i = 0;
+                for (Diagnostic d : value) {
+                        System.out.println("\t" + String.valueOf(i) + ": " + d.toString());
+                        ++i;
+                }
+        }
+
+        System.out.println("\n\n");
+        ///---------------------------------
+        
         return sb.toString();
     }
 

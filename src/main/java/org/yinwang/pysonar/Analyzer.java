@@ -9,6 +9,8 @@ import org.yinwang.pysonar.types.*;
 import org.yinwang.pysonar.visitor.TypeInferencer;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
@@ -597,21 +599,53 @@ public class Analyzer {
         sb.append("\n- name resolve rate: " + $.percent(resolved, resolved + unresolved));
         sb.append("\n" + $.getGCStats());
 
-
+        
         /// Ugly codes to print out the semantic errors
-        if (semanticErrors.size() > 0)
-                System.out.println("\n\nPrinting the semantic errors: \n");
+        FileWriter writer = null; 
+        
+        if (semanticErrors.size() > 0) {
+            try {
+                writer = new FileWriter("pysonar-log.txt");
+            } catch(IOException e) {
+                System.out.println("Can not create pysonar-log.txt!");
+            }
+        
+            System.out.println("\n\nPrinting the semantic errors: \n");
+        }
+        
         for (Map.Entry<String, List<Diagnostic>> entry : semanticErrors.entrySet()) {
                 String key = entry.getKey();
                 List<Diagnostic> value = entry.getValue();
                 System.out.println("In the file: " + key);
+
+                try {
+                    writer.write(key + "\n");
+                } catch(IOException e) {
+                    ;
+                }
+                
                 int i = 0;
                 for (Diagnostic d : value) {
-                        System.out.println("\t" + String.valueOf(i) + ": " + d.toString());
-                        ++i;
+
+                    try {
+                        writer.write(String.valueOf(i) + ": " + d.toString() + "\n");
+                    } catch(IOException e) {
+                        ;
+                    }
+                    
+                    System.out.println("  " + String.valueOf(i) + ": " + d.toString());
+                    ++i;
                 }
         }
 
+        if (semanticErrors.size() > 0) {
+            try{
+                writer.close();
+            } catch(IOException e) {
+                ;
+            }
+        }
+        
         System.out.println("\n\n");
         ///---------------------------------
         
